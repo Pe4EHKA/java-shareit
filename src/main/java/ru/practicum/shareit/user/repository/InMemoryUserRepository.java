@@ -3,19 +3,22 @@ package ru.practicum.shareit.user.repository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
+    private final Map<String, User> claimedEmail = new HashMap<>();
     private long seq = 0;
 
     @Override
     public Collection<User> findAll() {
         return users.values();
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return claimedEmail.get(email);
     }
 
     @Override
@@ -27,6 +30,7 @@ public class InMemoryUserRepository implements UserRepository {
     public User save(User user) {
         user.setId(generateId());
         users.put(user.getId(), user);
+        claimedEmail.put(user.getEmail(), user);
         return users.get(user.getId());
     }
 
@@ -38,12 +42,15 @@ public class InMemoryUserRepository implements UserRepository {
         }
         if (user.getEmail() != null) {
             updatedUser.setEmail(user.getEmail());
+            claimedEmail.remove(user.getEmail());
+            claimedEmail.put(user.getEmail(), user);
         }
         return updatedUser;
     }
 
     @Override
     public void delete(long id) {
+        claimedEmail.remove(users.get(id).getEmail());
         users.remove(id);
     }
 

@@ -3,6 +3,8 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
@@ -18,38 +20,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public User addUser(User user) {
-        if (checkEmailAlreadyExists(user.getEmail())) {
-            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
+    public UserDto addUser(UserDto userDto) {
+        if (checkEmailAlreadyExists(userDto.getEmail())) {
+            throw new IllegalArgumentException("User with email " + userDto.getEmail() + " already exists");
         }
-        return userRepository.save(user);
+        User user = userRepository.save(UserMapper.toUser(userDto));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public User updateUser(User user, Long id) {
-        if (checkEmailAlreadyExists(user.getEmail())) {
-            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
+    public UserDto updateUser(UserDto userDto, Long userId) {
+        if (checkEmailAlreadyExists(userDto.getEmail())) {
+            throw new IllegalArgumentException("User with email " + userDto.getEmail() + " already exists");
         }
-        User oldUser = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
-        user.setId(oldUser.getId());
-        return userRepository.update(user);
+        User oldUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+        userDto.setId(oldUser.getId());
+        User user = userRepository.update(UserMapper.toUser(userDto));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userRepository.delete(id);
+    public void deleteUser(Long userId) {
+        userRepository.delete(userId);
     }
 
     private boolean checkEmailAlreadyExists(String email) {
-        Collection<User> users = userRepository.findAll();
-        return users.stream()
-                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
+        return userRepository.findByEmail(email) != null;
     }
 }

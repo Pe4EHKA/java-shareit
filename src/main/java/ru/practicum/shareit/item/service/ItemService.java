@@ -10,9 +10,9 @@ public interface ItemService {
 
     Collection<Item> getItemsByText(String text);
 
-    Item getItemById(Long itemId);
+    ItemDto getItemById(Long itemId);
 
-    Item addItem(ItemDto itemDto, Long ownerId);
+    ItemDto addItem(ItemDto itemDto, Long ownerId);
 
-    Item updateItem(ItemDto itemDto, Long ownerId, Long itemId);
+    ItemDto updateItem(ItemDto itemDto, Long ownerId, Long itemId);
 }

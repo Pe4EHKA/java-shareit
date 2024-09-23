@@ -8,11 +8,17 @@ import java.util.*;
 @Repository
 public class InMemoryItemRepository implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, Collection<Item>> ownerItems = new HashMap<>();
     private long seq = 0;
 
     @Override
     public Collection<Item> findAll() {
         return items.values();
+    }
+
+    @Override
+    public Collection<Item> findAllByOwner(Long ownerId) {
+        return ownerItems.get(ownerId);
     }
 
     @Override
@@ -24,6 +30,7 @@ public class InMemoryItemRepository implements ItemRepository {
     public Item save(Item item) {
         item.setId(generateId());
         items.put(item.getId(), item);
+        ownerItems.computeIfAbsent(item.getOwner(), k -> new ArrayList<>()).add(item);
         return items.get(item.getId());
     }
 
@@ -45,6 +52,10 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public void delete(Item item) {
         items.remove(item.getId());
+        ownerItems.computeIfPresent(item.getOwner(), (k, ownerItems) -> {
+            ownerItems.remove(item);
+            return ownerItems;
+        });
     }
 
     private long generateId() {

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface ItemRepository {
     Collection<Item> findAll();
 
+    Collection<Item> findAllByOwner(Long ownerId);
+
     Optional<Item> findById(Long id);
 
     Item save(Item item);

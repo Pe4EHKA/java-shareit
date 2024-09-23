@@ -21,32 +21,32 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public Item addItem(@Valid @RequestBody ItemDto itemDto,
-                        @RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        Item item = itemService.addItem(itemDto, ownerId);
+    public ItemDto addItem(@Valid @RequestBody ItemDto itemDto,
+                           @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+        ItemDto item = itemService.addItem(itemDto, ownerId);
         log.info("Item added: {}", item);
         return item;
     }
 
     @PatchMapping("/{itemId}")
-    public Item updateItem(@RequestBody ItemDto itemDto,
-                           @RequestHeader("X-Sharer-User-Id") Long ownerId,
-                           @PathVariable("itemId") Long itemId) {
-        Item item = itemService.updateItem(itemDto, ownerId, itemId);
+    public ItemDto updateItem(@RequestBody ItemDto itemDto,
+                              @RequestHeader(Headers.SHARER_USER_ID) Long ownerId,
+                              @PathVariable("itemId") Long itemId) {
+        ItemDto item = itemService.updateItem(itemDto, ownerId, itemId);
         log.info("Item updated: {}", item);
         return item;
     }
 
     @GetMapping("/{itemId}")
-    public Item getItem(@PathVariable Long itemId,
-                        @RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        Item item = itemService.getItemById(itemId);
+    public ItemDto getItem(@PathVariable Long itemId,
+                           @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+        ItemDto item = itemService.getItemById(itemId);
         log.info("Item found: {}", item);
         return item;
     }
 
     @GetMapping
-    public Collection<Item> getUserItems(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public Collection<Item> getUserItems(@RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
         Collection<Item> userItems = itemService.getItemsByOwnerId(ownerId);
         log.info("User items found: {}", userItems);
         return userItems;
@@ -54,7 +54,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public Collection<Item> getItemsByText(@RequestParam("text") String text,
-                                           @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+                                           @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
         Collection<Item> textItems = itemService.getItemsByText(text);
         log.info("Searching for items with text {}", text);
         return textItems;

@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +20,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<Item> getItemsByOwnerId(Long ownerId) {
-        return itemRepository.findAll().stream()
-                .filter(item -> Objects.equals(item.getOwner(), ownerId))
-                .toList();
+        return itemRepository.findAllByOwner(ownerId);
     }
 
     @Override
@@ -40,29 +37,28 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item getItemById(Long itemId) {
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Item with id " + itemId + " not found"));
+    public ItemDto getItemById(Long itemId) {
+        return ItemMapper.toItemDto(itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item with id " + itemId + " not found")));
     }
 
     @Override
-    public Item addItem(ItemDto itemDto, Long ownerId) {
+    public ItemDto addItem(ItemDto itemDto, Long ownerId) {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " not found"));
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(ownerId);
-        return itemRepository.save(item);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
-    public Item updateItem(ItemDto itemDto, Long ownerId, Long itemId) {
+    public ItemDto updateItem(ItemDto itemDto, Long ownerId, Long itemId) {
         Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " not found"));
         if (!oldItem.getOwner().equals(ownerId)) {
             throw new NotFoundException("Item with id " + itemId + " is not owned by owner with id " + ownerId);
         }
-        Item newItem = ItemMapper.toItem(itemDto);
+        Item newItem = ItemMapper.toItem(itemDto, ownerId);
         newItem.setId(oldItem.getId());
-        return itemRepository.update(newItem);
+        return ItemMapper.toItemDto(itemRepository.update(newItem));
     }
 }
