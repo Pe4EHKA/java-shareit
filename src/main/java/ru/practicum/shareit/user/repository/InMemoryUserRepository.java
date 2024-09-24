@@ -35,14 +35,14 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User update(User user) {
-        User updatedUser = users.get(user.getId());
-        if (user.getName() != null) {
-            updatedUser.setName(user.getName());
+    public User update(User updatedUser) {
+        User user = users.get(updatedUser.getId());
+        if (updatedUser.getName() != null) {
+            user.setName(updatedUser.getName());
         }
-        if (user.getEmail() != null) {
-            claimedEmail.remove(updatedUser.getEmail());
-            updatedUser.setEmail(user.getEmail());
+        if (updatedUser.getEmail() != null) {
+            claimedEmail.remove(user.getEmail());
+            user.setEmail(updatedUser.getEmail());
             claimedEmail.add(updatedUser.getEmail());
         }
         return updatedUser;
