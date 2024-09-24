@@ -8,7 +8,7 @@ import java.util.*;
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
-    private final Map<String, User> claimedEmail = new HashMap<>();
+    private final Set<String> claimedEmail = new HashSet<>();
     private long seq = 0;
 
     @Override
@@ -17,8 +17,8 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User findByEmail(String email) {
-        return claimedEmail.get(email);
+    public Collection<String> findEmails() {
+        return claimedEmail;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class InMemoryUserRepository implements UserRepository {
     public User save(User user) {
         user.setId(generateId());
         users.put(user.getId(), user);
-        claimedEmail.put(user.getEmail(), user);
+        claimedEmail.add(user.getEmail());
         return users.get(user.getId());
     }
 
@@ -41,9 +41,9 @@ public class InMemoryUserRepository implements UserRepository {
             updatedUser.setName(user.getName());
         }
         if (user.getEmail() != null) {
+            claimedEmail.remove(updatedUser.getEmail());
             updatedUser.setEmail(user.getEmail());
-            claimedEmail.remove(user.getEmail());
-            claimedEmail.put(user.getEmail(), user);
+            claimedEmail.add(updatedUser.getEmail());
         }
         return updatedUser;
     }

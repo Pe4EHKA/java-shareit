@@ -53,6 +53,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean checkEmailAlreadyExists(String email) {
-        return userRepository.findByEmail(email) != null;
+        return userRepository.findEmails().contains(email);
     }
 }
