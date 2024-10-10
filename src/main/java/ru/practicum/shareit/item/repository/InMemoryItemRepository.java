@@ -30,7 +30,7 @@ public class InMemoryItemRepository implements ItemRepository {
     public Item save(Item item) {
         item.setId(generateId());
         items.put(item.getId(), item);
-        ownerItems.computeIfAbsent(item.getOwner(), k -> new ArrayList<>()).add(item);
+        ownerItems.computeIfAbsent(item.getOwner().getId(), k -> new ArrayList<>()).add(item);
         return items.get(item.getId());
     }
 
@@ -52,7 +52,7 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public void delete(Item item) {
         items.remove(item.getId());
-        ownerItems.computeIfPresent(item.getOwner(), (k, ownerItems) -> {
+        ownerItems.computeIfPresent(item.getOwner().getId(), (k, ownerItems) -> {
             ownerItems.remove(item);
             return ownerItems;
         });

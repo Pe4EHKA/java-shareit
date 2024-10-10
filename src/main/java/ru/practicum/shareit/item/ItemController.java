@@ -4,15 +4,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
@@ -21,7 +19,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto addItem(@Valid @RequestBody ItemDto itemDto,
+    public ItemDto addItem(@Valid @RequestBody ItemCreateDto itemDto,
                            @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
         ItemDto item = itemService.addItem(itemDto, ownerId);
         log.info("Item added: {}", item);
@@ -29,7 +27,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto,
+    public ItemDto updateItem(@RequestBody ItemUpdateDto itemDto,
                               @RequestHeader(Headers.SHARER_USER_ID) Long ownerId,
                               @PathVariable("itemId") Long itemId) {
         ItemDto item = itemService.updateItem(itemDto, ownerId, itemId);
@@ -46,16 +44,16 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<Item> getUserItems(@RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
-        Collection<Item> userItems = itemService.getItemsByOwnerId(ownerId);
+    public Collection<ItemDto> getUserItems(@RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+        Collection<ItemDto> userItems = itemService.getItemsByOwnerId(ownerId);
         log.info("User items found: {}", userItems);
         return userItems;
     }
 
     @GetMapping("/search")
-    public Collection<Item> getItemsByText(@RequestParam("text") String text,
+    public Collection<ItemDto> getItemsByText(@RequestParam("text") String text,
                                            @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
-        Collection<Item> textItems = itemService.getItemsByText(text);
+        Collection<ItemDto> textItems = itemService.getItemsByText(text);
         log.info("Searching for items with text {}", text);
         return textItems;
     }
