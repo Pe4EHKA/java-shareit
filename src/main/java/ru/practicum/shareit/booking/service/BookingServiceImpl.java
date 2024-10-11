@@ -96,8 +96,8 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case BookingSearchState.ALL -> bookings = bookingRepositoryJPA.findBookingsByBookerId(userId);
-            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA.
-                    findBookingsCurrent(userId, LocalDateTime.now());
+            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA
+                    .findBookingsCurrent(userId, LocalDateTime.now());
             case BookingSearchState.PAST -> bookings = bookingRepositoryJPA
                     .findBookingsPast(userId, LocalDateTime.now());
             case BookingSearchState.FUTURE -> bookings = bookingRepositoryJPA
@@ -125,8 +125,8 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case BookingSearchState.ALL -> bookings = bookingRepositoryJPA.findBookingsByOwnerId(ownerId);
-            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA.
-                    findBookingsCurrent(ownerId, LocalDateTime.now());
+            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA
+                    .findBookingsCurrent(ownerId, LocalDateTime.now());
             case BookingSearchState.PAST -> bookings = bookingRepositoryJPA
                     .findBookingsPast(ownerId, LocalDateTime.now());
             case BookingSearchState.FUTURE -> bookings = bookingRepositoryJPA
