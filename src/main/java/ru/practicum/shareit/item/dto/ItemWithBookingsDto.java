@@ -4,12 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
-public class ItemDto {
+public class ItemWithBookingsDto {
     private Long id;
     private String name;
     private String description;
     private Boolean available;
     private UserDto owner;
+    private LocalDateTime lastBooking;
+    private LocalDateTime nextBooking;
+    private List<CommentDto> comments;
 }

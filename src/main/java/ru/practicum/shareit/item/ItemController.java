@@ -4,9 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemCreateDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
@@ -36,25 +34,34 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId,
-                           @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
-        ItemDto item = itemService.getItemById(itemId);
+    public ItemWithBookingsDto getItem(@PathVariable Long itemId,
+                                       @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+        ItemWithBookingsDto item = itemService.getItemById(itemId);
         log.info("Item found: {}", item);
         return item;
     }
 
     @GetMapping
-    public Collection<ItemDto> getUserItems(@RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
-        Collection<ItemDto> userItems = itemService.getItemsByOwnerId(ownerId);
+    public Collection<ItemWithBookingsDto> getUserItems(@RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+        Collection<ItemWithBookingsDto> userItems = itemService.getItemsByOwnerId(ownerId);
         log.info("User items found: {}", userItems);
         return userItems;
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> getItemsByText(@RequestParam("text") String text,
-                                           @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
+                                              @RequestHeader(Headers.SHARER_USER_ID) Long ownerId) {
         Collection<ItemDto> textItems = itemService.getItemsByText(text);
         log.info("Searching for items with text {}", text);
         return textItems;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@PathVariable(name = "itemId") Long itemId,
+                                 @RequestBody CommentCreateDto commentCreateDto,
+                                 @RequestHeader(Headers.SHARER_USER_ID) Long userId) {
+        CommentDto commentDto = itemService.addComment(itemId, userId, commentCreateDto.getText());
+        log.info("Comment added: {}", commentDto);
+        return commentDto;
     }
 }
