@@ -3,16 +3,16 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.repository.BookingRepositoryJPA;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.CommentRepositoryJPA;
-import ru.practicum.shareit.item.repository.ItemRepositoryJPA;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepositoryJPA;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -22,10 +22,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final ItemRepositoryJPA itemRepository;
-    private final UserRepositoryJPA userRepository;
-    private final BookingRepositoryJPA bookingRepositoryJPA;
-    private final CommentRepositoryJPA commentRepositoryJPA;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -89,22 +89,18 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " not found"));
-        if (!bookingRepositoryJPA.existsBookingByItem_IdAndBooker_Id(itemId, userId)) {
+        if (!bookingRepository.existsBookingByItem_IdAndBooker_Id(itemId, userId)) {
             throw new NotAvailableException("You can comment only on completed bookings");
         }
-        Comment comment = new Comment();
-        comment.setText(text);
-        comment.setAuthor(user);
-        comment.setItem(item);
-        comment.setCreated(LocalDateTime.now());
+        Comment comment = CommentMapper.toComment(user, item, text);
 
-        return ItemMapper.toCommentDto(commentRepositoryJPA.save(comment));
+        return ItemMapper.toCommentDto(commentRepository.save(comment));
     }
 
     private ItemWithBookingsDto getItemWithBookingsDto(Item item) {
-        LocalDateTime lastBookingDate = bookingRepositoryJPA.findLastBookingDateByItemId(item.getId());
-        LocalDateTime nextBookingDate = bookingRepositoryJPA.findNextBookingDateByItemId(item.getId());
-        List<CommentDto> commentDtos = commentRepositoryJPA.getCommentsByItemId(item.getId()).stream()
+        LocalDateTime lastBookingDate = bookingRepository.findLastBookingDateByItemId(item.getId());
+        LocalDateTime nextBookingDate = bookingRepository.findNextBookingDateByItemId(item.getId());
+        List<CommentDto> commentDtos = commentRepository.getCommentsByItemId(item.getId()).stream()
                 .map(ItemMapper::toCommentDto)
                 .toList();
         return ItemMapper.toItemWithBookingsDto(item, lastBookingDate, nextBookingDate, commentDtos);

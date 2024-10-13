@@ -9,13 +9,13 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.repository.BookingRepositoryJPA;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepositoryJPA;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepositoryJPA;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -24,19 +24,19 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepositoryJPA bookingRepositoryJPA;
-    private final UserRepositoryJPA userRepositoryJPA;
-    private final ItemRepositoryJPA itemRepositoryJPA;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     @Transactional
     public BookingDto addBooking(BookingCreateDto bookingCreateDto, Long bookerId) {
-        User booker = userRepositoryJPA.findById(bookerId)
+        User booker = userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + bookerId + " not found"));
-        Item item = itemRepositoryJPA.findById(bookingCreateDto.getItemId())
+        Item item = itemRepository.findById(bookingCreateDto.getItemId())
                 .orElseThrow(() ->
                         new NotFoundException("Item  with id" + bookingCreateDto.getItemId() + " not found"));
-        if (bookingRepositoryJPA
+        if (bookingRepository
                 .existsBookingByDateAndItemId(bookingCreateDto.getStart(), bookingCreateDto.getEnd(), item.getId())) {
             throw new IllegalArgumentException("Booking on this item with id: + " + bookingCreateDto.getItemId() +
                     " in time between start: " + bookingCreateDto.getStart() + " and end: " +
@@ -48,38 +48,35 @@ public class BookingServiceImpl implements BookingService {
         }
 
         item.setAvailable(false);
-        itemRepositoryJPA.save(item);
+        itemRepository.save(item);
 
-        Booking booking = BookingMapper.toBooking(bookingCreateDto);
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
+        Booking booking = BookingMapper.toBooking(bookingCreateDto, item, booker);
 
-        booking = bookingRepositoryJPA.save(booking);
+        booking = bookingRepository.save(booking);
         return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public BookingDto approveBooking(Long bookingId, Long ownerId, Boolean approved) {
-        User owner = userRepositoryJPA.findById(ownerId)
-                .orElseThrow(() -> new NotAvailableException("User with id " + ownerId + " not found"));
-        Booking booking = bookingRepositoryJPA.findById(bookingId)
-                .orElseThrow(() -> new NotAvailableException("Booking with id " + bookingId + " not found"));
-        if (!booking.getItem().getOwner().equals(owner)) {
-            throw new IllegalArgumentException("User with id " + ownerId +
-                    " is not owner of item with id: " + booking.getItem().getId());
+        Booking booking = bookingRepository.findByIdAndItem_OwnerId(bookingId, ownerId)
+                .orElseThrow(() -> new NotAvailableException("Booking with id " + bookingId +
+                        " and item ownerId: " + ownerId + " not found "));
+        if (!approved) {
+            Item item = booking.getItem();
+            item.setAvailable(true);
+            itemRepository.save(item);
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
-        bookingRepositoryJPA.save(booking);
+        bookingRepository.save(booking);
         return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public BookingDto getBooking(Long bookingId, Long userId) {
-        User user = userRepositoryJPA.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
-        Booking booking = bookingRepositoryJPA.findById(bookingId)
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking with id " + bookingId + " not found"));
         if (!(booking.getItem().getOwner().equals(user) || booking.getBooker().getId().equals(userId))) {
             throw new IllegalArgumentException("User with id " + userId +
@@ -91,20 +88,20 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getUserBookings(Long userId, BookingSearchState state) {
-        userRepositoryJPA.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         List<Booking> bookings;
         switch (state) {
-            case BookingSearchState.ALL -> bookings = bookingRepositoryJPA.findBookingsByBookerId(userId);
-            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA
+            case BookingSearchState.ALL -> bookings = bookingRepository.findBookingsByBookerId(userId);
+            case BookingSearchState.CURRENT -> bookings = bookingRepository
                     .findBookingsCurrent(userId, LocalDateTime.now());
-            case BookingSearchState.PAST -> bookings = bookingRepositoryJPA
+            case BookingSearchState.PAST -> bookings = bookingRepository
                     .findBookingsPast(userId, LocalDateTime.now());
-            case BookingSearchState.FUTURE -> bookings = bookingRepositoryJPA
+            case BookingSearchState.FUTURE -> bookings = bookingRepository
                     .findBookingsFuture(userId, LocalDateTime.now());
-            case BookingSearchState.WAITING -> bookings = bookingRepositoryJPA
+            case BookingSearchState.WAITING -> bookings = bookingRepository
                     .findBookingsByBooker_IdAndStatus(userId, BookingStatus.WAITING);
-            case BookingSearchState.REJECTED -> bookings = bookingRepositoryJPA
+            case BookingSearchState.REJECTED -> bookings = bookingRepository
                     .findBookingsByBooker_IdAndStatus(userId, BookingStatus.REJECTED);
             default -> throw new IllegalArgumentException("Booking search state " + state + " not supported");
         }
@@ -117,23 +114,23 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getOwnerBookings(Long ownerId, BookingSearchState state) {
-        userRepositoryJPA.findById(ownerId)
+        userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " not found"));
-        if (!itemRepositoryJPA.existsItemByOwner_Id(ownerId)) {
+        if (!itemRepository.existsItemByOwner_Id(ownerId)) {
             throw new NotFoundException("Owner with id " + ownerId + " doesn't have any items");
         }
         List<Booking> bookings;
         switch (state) {
-            case BookingSearchState.ALL -> bookings = bookingRepositoryJPA.findBookingsByOwnerId(ownerId);
-            case BookingSearchState.CURRENT -> bookings = bookingRepositoryJPA
+            case BookingSearchState.ALL -> bookings = bookingRepository.findBookingsByOwnerId(ownerId);
+            case BookingSearchState.CURRENT -> bookings = bookingRepository
                     .findBookingsCurrent(ownerId, LocalDateTime.now());
-            case BookingSearchState.PAST -> bookings = bookingRepositoryJPA
+            case BookingSearchState.PAST -> bookings = bookingRepository
                     .findBookingsPast(ownerId, LocalDateTime.now());
-            case BookingSearchState.FUTURE -> bookings = bookingRepositoryJPA
+            case BookingSearchState.FUTURE -> bookings = bookingRepository
                     .findBookingsFuture(ownerId, LocalDateTime.now());
-            case BookingSearchState.WAITING -> bookings = bookingRepositoryJPA
+            case BookingSearchState.WAITING -> bookings = bookingRepository
                     .findBookingsByBooker_IdAndStatus(ownerId, BookingStatus.WAITING);
-            case BookingSearchState.REJECTED -> bookings = bookingRepositoryJPA
+            case BookingSearchState.REJECTED -> bookings = bookingRepository
                     .findBookingsByBooker_IdAndStatus(ownerId, BookingStatus.REJECTED);
             default -> throw new IllegalArgumentException("Booking search state " + state + " not supported");
         }

@@ -46,9 +46,9 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingDto> getUserBookings(@RequestParam(name = "state",
-            defaultValue = "ALL") BookingSearchState state,
-                                                  @RequestHeader(Headers.SHARER_USER_ID) Long userId) {
+    public Collection<BookingDto> getUserBookings(
+            @RequestParam(name = "state", defaultValue = "ALL") BookingSearchState state,
+            @RequestHeader(Headers.SHARER_USER_ID) Long userId) {
         List<BookingDto> bookingDtos = bookingService.getUserBookings(userId, state);
         log.info("User Bookings: {}", bookingDtos);
         return bookingDtos;

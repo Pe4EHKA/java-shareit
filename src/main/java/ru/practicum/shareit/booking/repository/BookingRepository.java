@@ -7,8 +7,9 @@ import ru.practicum.shareit.booking.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface BookingRepositoryJPA extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query(value = "SELECT COUNT(*) > 0 " +
             "FROM bookings AS b " +
             "where b.item_id = ?3 " +
@@ -23,6 +24,8 @@ public interface BookingRepositoryJPA extends JpaRepository<Booking, Long> {
             "AND b.status = 'APPROVED' " +
             "AND b.end_date < CURRENT_TIMESTAMP", nativeQuery = true)
     Boolean existsBookingByItem_IdAndBooker_Id(Long itemId, Long bookerId);
+
+    Optional<Booking> findByIdAndItem_OwnerId(Long bookingId, Long ownerId);
 
     List<Booking> findBookingsByBookerId(Long bookerId);
 
