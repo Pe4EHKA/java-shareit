@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -61,10 +62,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query(value = "SELECT bk.end_date " +
             "FROM bookings as bk " +
             "JOIN items AS it ON bk.item_id = it.id " +
-            "where it.id = ?1 and bk.status = 'APPROVED' and bk.end_date < current_timestamp - interval '2 second' " +
+            "where it.id = ?1 and bk.status = 'APPROVED' " +
+            "and bk.end_date < ?2 " +
             "order by bk.end_date DESC " +
             "limit 1 ", nativeQuery = true)
-    LocalDateTime findLastBookingDateByItemId(Long itemId);
+    LocalDateTime findLastBookingDateByItemId(Long itemId, Timestamp now);
 
     @Query(value = "SELECT bk.start_date " +
             "FROM bookings as bk " +

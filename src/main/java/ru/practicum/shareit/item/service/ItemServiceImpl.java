@@ -14,6 +14,8 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -98,7 +100,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemWithBookingsDto getItemWithBookingsDto(Item item) {
-        LocalDateTime lastBookingDate = bookingRepository.findLastBookingDateByItemId(item.getId());
+        LocalDateTime lastBookingDate = bookingRepository.findLastBookingDateByItemId(item.getId(),
+                Timestamp.valueOf(LocalDateTime.now().minusSeconds(3)));
         LocalDateTime nextBookingDate = bookingRepository.findNextBookingDateByItemId(item.getId());
         List<CommentDto> commentDtos = commentRepository.getCommentsByItemId(item.getId()).stream()
                 .map(ItemMapper::toCommentDto)

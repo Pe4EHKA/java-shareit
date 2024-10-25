@@ -21,8 +21,8 @@ public class BookingCreateDto {
     @Future
     private LocalDateTime end;
 
-    @AssertTrue(message = "Start and end time must not be equal")
-    private boolean isStartAndEndEqual() {
-        return start != null && end != null && !start.isEqual(end);
+    @AssertTrue(message = "Start must be before end")
+    private boolean isStartBeforeEnd() {
+        return start != null && end != null && start.isBefore(end);
     }
 }
