@@ -1,20 +1,16 @@
 package ru.practicum.shareit.booking.repository;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Booking findBookingByItemIdAndBookerId(Long itemId, Long bookerId);
-
     @Query(value = "SELECT COUNT(*) > 0 " +
             "FROM bookings AS b " +
             "where b.item_id = ?3 " +
@@ -63,6 +59,31 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where bk.item.owner.id = ?1 ")
     List<Booking> findBookingsByOwnerId(Long ownerId);
 
+    @Query("select b from Booking b " +
+            "join b.item as it " +
+            "where ?2 between b.start and b.end " +
+            "and (b.status = ru.practicum.shareit.booking.BookingStatus.APPROVED " +
+            "or b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) " +
+            "and it.owner.id = ?1 ")
+    List<Booking> findOwnerBookingsCurrent(Long userId, LocalDateTime now);
+
+    @Query(value = "select b from Booking b " +
+            "join b.item as it " +
+            "where b.end < ?2 " +
+            "and (b.status = ru.practicum.shareit.booking.BookingStatus.APPROVED) " +
+            "and it.owner.id = ?1 ")
+    List<Booking> findOwnerBookingsPast(Long userId, LocalDateTime now);
+
+    @Query("select b from Booking b " +
+            "join b.item as it " +
+            "where b.start > ?2 " +
+            "and (b.status = ru.practicum.shareit.booking.BookingStatus.APPROVED " +
+            "or b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) " +
+            "and it.owner.id = ?1 ")
+    List<Booking> findOwnerBookingsFuture(Long userId, LocalDateTime now);
+
+    List<Booking> findBookingsByItem_OwnerIdAndStatus(Long ownerId, BookingStatus status);
+
     @Query(value = "SELECT bk.end_date " +
             "FROM bookings as bk " +
             "JOIN items AS it ON bk.item_id = it.id " +
@@ -79,4 +100,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "order by bk.start_date " +
             "limit 1 ", nativeQuery = true)
     LocalDateTime findNextBookingDateByItemId(Long itemId);
+
+    void deleteByBookerId(Long bookerId);
+
+    void deleteByItem_OwnerId(Long ownerId);
 }

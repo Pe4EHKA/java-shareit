@@ -1,14 +1,10 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
-@Getter
-@ToString
+@Data
 public class BookingCreateDto {
     private Long itemId;
 

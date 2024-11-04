@@ -20,7 +20,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 
@@ -130,15 +129,15 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case BookingSearchState.ALL -> bookings = bookingRepository.findBookingsByOwnerId(ownerId);
             case BookingSearchState.CURRENT -> bookings = bookingRepository
-                    .findBookingsCurrent(ownerId, Instant.now());
+                    .findOwnerBookingsCurrent(ownerId, LocalDateTime.now());
             case BookingSearchState.PAST -> bookings = bookingRepository
-                    .findBookingsPast(ownerId, Instant.now());
+                    .findOwnerBookingsPast(ownerId, LocalDateTime.now());
             case BookingSearchState.FUTURE -> bookings = bookingRepository
-                    .findBookingsFuture(ownerId, Instant.now());
+                    .findOwnerBookingsFuture(ownerId, LocalDateTime.now());
             case BookingSearchState.WAITING -> bookings = bookingRepository
-                    .findBookingsByBooker_IdAndStatus(ownerId, BookingStatus.WAITING);
+                    .findBookingsByItem_OwnerIdAndStatus(ownerId, BookingStatus.WAITING);
             case BookingSearchState.REJECTED -> bookings = bookingRepository
-                    .findBookingsByBooker_IdAndStatus(ownerId, BookingStatus.REJECTED);
+                    .findBookingsByItem_OwnerIdAndStatus(ownerId, BookingStatus.REJECTED);
             default -> throw new IllegalArgumentException("Booking search state " + state + " not supported");
         }
 

@@ -2,13 +2,9 @@ package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class ItemCreateDto {
     @NotBlank
     private String name;
@@ -16,4 +12,5 @@ public class ItemCreateDto {
     private String description;
     @NotNull
     private Boolean available;
+    private Long requestId;
 }
