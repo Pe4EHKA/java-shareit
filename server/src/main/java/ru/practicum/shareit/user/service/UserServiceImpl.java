@@ -2,6 +2,11 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -14,6 +19,10 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final RequestRepository requestRepository;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -56,8 +65,19 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(user);
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long userId) {
+        bookingRepository.deleteByItem_OwnerId(userId);
+        bookingRepository.deleteByBookerId(userId);
+
+        commentRepository.deleteByAuthorId(userId);
+        commentRepository.deleteByItem_OwnerId(userId);
+
+        requestRepository.deleteByRequesterId(userId);
+
+        itemRepository.deleteByOwnerId(userId);
+
         userRepository.deleteById(userId);
     }
 }

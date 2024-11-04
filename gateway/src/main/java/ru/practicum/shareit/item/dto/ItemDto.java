@@ -1,13 +1,9 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 import ru.practicum.shareit.user.dto.UserDto;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class ItemDto {
     private Long id;
     private String name;

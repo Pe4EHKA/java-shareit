@@ -6,8 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
@@ -65,16 +63,4 @@ public class BookingController {
         log.info("Owner Bookings: {}", bookingDtos);
         return bookingDtos;
     }
-
-//    @GetMapping
-//    public ResponseEntity<Object> getBookings(@RequestHeader(Headers.SHARER_USER_ID) long userId,
-//                                              @RequestParam(name = "state", defaultValue = "all") String stateParam,
-//                                              @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-//                                              @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-//        BookingSearchState state = BookingSearchState.from(stateParam)
-//                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-//        log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-//        return bookingClient.getBookings(userId, state, from, size);
-//    }
-
 }
