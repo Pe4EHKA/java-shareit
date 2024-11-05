@@ -68,16 +68,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void deleteUser(Long userId) {
-        bookingRepository.deleteByItem_OwnerId(userId);
-        bookingRepository.deleteByBookerId(userId);
-
-        commentRepository.deleteByAuthorId(userId);
-        commentRepository.deleteByItem_OwnerId(userId);
-
-        requestRepository.deleteByRequesterId(userId);
-
-        itemRepository.deleteByOwnerId(userId);
-
         userRepository.deleteById(userId);
     }
 }

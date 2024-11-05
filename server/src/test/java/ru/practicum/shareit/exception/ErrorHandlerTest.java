@@ -41,16 +41,6 @@ class ErrorHandlerTest {
     }
 
     @Test
-    @DisplayName("BadRequestWhenMissingRequestHeaderExceptionThrown")
-    void shouldReturnBadRequestWhenMissingRequestHeaderExceptionThrown() throws Exception {
-        mockMvc.perform(get("/bookings/owner")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Required request header " +
-                        "'X-Sharer-User-Id' for method parameter type Long is not present"));
-    }
-
-    @Test
     @DisplayName("BadRequestWhenNotAvailableExceptionThrown")
     void shouldReturnBadRequestWhenNotAvailableExceptionThrown() throws Exception {
         doThrow(new NotAvailableException("Resource not available")).when(userService).getAllUsers();

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ResponseEntity<Object> addRequest(@RequestHeader(Headers.SHARER_USER_ID) Long userId,
-                                     @RequestBody ItemRequestDto requestDto) {
+                                             @Valid @RequestBody ItemRequestDto requestDto) {
         log.info("Add request: {}, userId: {}", requestDto, userId);
         ResponseEntity<Object> requestDtoAnswer = requestClient.addRequest(userId, requestDto);
         log.info("Added request: {}", requestDtoAnswer);
@@ -42,7 +43,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getRequest(@RequestHeader(Headers.SHARER_USER_ID) Long userId,
-                                 @PathVariable("requestId") Long requestId) {
+                                             @PathVariable("requestId") Long requestId) {
         log.info("Get request with id: {}", requestId);
         ResponseEntity<Object> requestDto = requestClient.getRequest(userId, requestId);
         log.info("Got request with id: {}", requestDto);

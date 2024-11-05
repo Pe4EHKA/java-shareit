@@ -24,27 +24,4 @@ public class ErrorHandler {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleNotAvailableException(final NotAvailableException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-
 }
